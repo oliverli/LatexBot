@@ -17,6 +17,8 @@ var fs = require('fs'),
 // Create a bot that uses "polling" to fetch new updates
 const bot = new TelegramBot(token, { polling: true });
 
+const defaultPreamble = "\\usepackage{amsmath} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{graphicx} \\usepackage{mhchem}"
+
 // Matches "/convert [whatever]"
 bot.onText(/\/convert (.+)/, (msg, match) => {
   // "msg" is the received Message from Telegram
@@ -39,20 +41,52 @@ bot.onText(/\/status/, (msg, _) => {
   renderImage(chatId, "i\\hbar\\frac{\\partial}{\\partial t} \\Psi(\\mathbf{r},t) = \\left [ \\frac{-\\hbar^2}{2m}\\nabla^2 + V(\\mathbf{r},t)\\right ] \\Psi(\\mathbf{r},t)"); //Time-dependent Schrodinger equation (general)
 });
 
-bot.onText(/\/convertraw (.*)/, (msg, match) => {
+bot.onText(/\/convertraw(.*)/, (msg, match) => {
   // "msg" is the received Message from Telegram
   // "match" is the result of executing the regexp above on the text content
   // of the message
 
   const chatId = msg.chat.id;
   // const latex = match[1]; // the captured "whatever"
-  // input might be multilined -> len("/convertRaw") = 11
+  // input might be multilined -> len("/convertraw") = 11
   const latex = match["input"].substring(11).trim()
 
-  if (latex) renderImageRaw(chatId, latex);
+  if (latex) renderImageRaw(chatId, latex, defaultPreamble);
 });
 
-async function renderImageRaw(TelegramChatID, latex){
+bot.onText(/\/convertwithpreambleraw/, (msg) => {
+  // "msg" is the received Message from Telegram
+  // "match" is the result of executing the regexp above on the text content
+  // of the message
+
+  const chatId = msg.chat.id;
+  // const latex = match[1]; // the captured "whatever"
+  // input might be multilined -> len("/convertwithpreambleraw") = 23
+  latex = msg["text"].substring(23).trim();
+
+  preamble = [defaultPreamble];
+  body = [];
+
+  x = latex.split("\n");
+  l = x.length;
+
+  for(i = 0; i < l; i ++) {
+      elem = x[i];
+      if (elem.length >= 4 && elem.substring(0, 4) === "\\use") {
+          preamble.push(elem);
+      }
+      else {
+          body.push(elem);
+      }
+  };
+
+  preamble = preamble.join("\n");
+  body = body.join("\n");
+
+  if (body) renderImageRaw(chatId, body, preamble);
+});
+
+async function renderImageRaw(TelegramChatID, latex, preamble){
     request.post("https://quicklatex.com/latex3.f",
       {
         form: {
@@ -62,7 +96,7 @@ async function renderImageRaw(TelegramChatID, latex){
           mode: "0",
           out: "1",
           remhost: "quicklatex.com",
-          preamble: "\\usepackage{amsmath} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{graphicx} \\usepackage{mhchem}",
+          preamble: preamble,
           errors: "1"
         }
       }, (error, _, body) => {
@@ -71,7 +105,7 @@ async function renderImageRaw(TelegramChatID, latex){
         }
         else {
           const split = body.split("\n");
-          const image = split[1].split(" ")[0];
+          const image = split[1].split(" ")[0].trim();
 
           if (!error && image != "https://quicklatex.com/cache3/error.png") {
             bot.sendPhoto(TelegramChatID, image);
@@ -86,5 +120,5 @@ async function renderImageRaw(TelegramChatID, latex){
 }
 
 async function renderImage(TelegramChatID, latex) {
-  return renderImageRaw(TelegramChatID, `\\begin{align*}${latex}\\end{align*}`)
+  return renderImageRaw(TelegramChatID, `\\begin{align*}${latex}\\end{align*}`, defaultPreamble)
 }
