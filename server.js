@@ -87,7 +87,6 @@ bot.onText(/\/convertwithpreambleraw/, (msg) => {
 });
 
 async function renderImageRaw(TelegramChatID, latex, preamble){
-    console.log(latex, preamble);
     request.post("https://quicklatex.com/latex3.f",
       {
         form: {
