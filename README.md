@@ -1,6 +1,6 @@
 # LatexBot
 
-Telegram to convert any given LaTeX code in a Telegram Chat into a rendered picture for east viewing
+Telegram to convert any given LaTeX code in a Telegram Chat into a rendered picture for easy viewing
 
 Expanded on the original called LatexBot. Unfortunately, the dependencies were all outdated and it didn't work anymore.
 
