@@ -1,7 +1,18 @@
 const TelegramBot = require("node-telegram-bot-api");
 const request = require("request");
+
 // replace the value below with the Telegram token you receive from @BotFather
-const token = "";
+// load token from file
+var fs = require('fs'),
+    path = require('path'),
+    filePath = path.join(__dirname, 'token.txt');
+
+    const token = fs.readFileSync(filePath, {encoding: 'utf-8'}, function(err, data){
+        if (err) {
+            console.log("Err:", err);
+            exit();
+        }
+    }).trim();
 
 // Create a bot that uses "polling" to fetch new updates
 const bot = new TelegramBot(token, { polling: true });
@@ -28,7 +39,7 @@ bot.onText(/\/status/, (msg, _) => {
   renderImage(chatId, "i\\hbar\\frac{\\partial}{\\partial t} \\Psi(\\mathbf{r},t) = \\left [ \\frac{-\\hbar^2}{2m}\\nabla^2 + V(\\mathbf{r},t)\\right ] \\Psi(\\mathbf{r},t)"); //Time-dependent Schrodinger equation (general)
 });
 
-bot.onText(/\/convertRaw (.*)/, (msg, match) => {
+bot.onText(/\/convertraw (.*)/, (msg, match) => {
   // "msg" is the received Message from Telegram
   // "match" is the result of executing the regexp above on the text content
   // of the message
