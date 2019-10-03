@@ -105,7 +105,7 @@ async function renderImageRaw(TelegramChatID, latex, preamble){
         }
         else {
           const split = body.split("\n");
-          const image = split[1].split(" ")[0];
+          const image = split[1].split(" ")[0].trim();
 
           if (!error && image != "https://quicklatex.com/cache3/error.png") {
             bot.sendPhoto(TelegramChatID, image);
