@@ -1,115 +1,63 @@
-var express = require('express'),
-app = express(),
-fs = require('fs'),
-http = require('http'),
-request = require('request'),
-bodyParser = require('body-parser'),
-cookieParser = require('cookie-parser');
+const TelegramBot = require("node-telegram-bot-api");
+const request = require("request");
+const validUrl = require("valid-url");
+// replace the value below with the Telegram token you receive from @BotFather
+const token = "";
 
-var server = http.createServer(app).listen(16000);
+// Create a bot that uses "polling" to fetch new updates
+const bot = new TelegramBot(token, { polling: true });
 
-var BOT_AUTH = "";
+// Matches "/convert [whatever]"
+bot.onText(/\/convert (.+)/, (msg, match) => {
+  // "msg" is the received Message from Telegram
+  // "match" is the result of executing the regexp above on the text content
+  // of the message
 
-app.use(cookieParser());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+  const chatId = msg.chat.id;
+  const latex = match[1]; // the captured "whatever"
+  renderImage(chatId, latex);
+});
 
-app.post('/webhook', function(req, res){
-  res.send("Thanks!");
-  if (req.body.message.text != undefined) {
-    var TelegramChatID = req.body.message.chat.id;
-    var message = req.body.message.text.split(" ");
-    var command = message[0];
-    var sentence = req.body.message.text.replace("/convert ", "").replace("/convert@LatexBot ", "").replace("/help ", "").replace("/help@LatexBot ", "").replace("/start ", "").replace("/convertDoc ", "").replace("/convertDoc@LatexBot ", "");
+bot.onText(/\/status/, (msg, _) => {
+  // "msg" is the received Message from Telegram
+  // "match" is the result of executing the regexp above on the text content
+  // of the message
 
-    if (command == "/help" || command == "/help@LatexBot" || command == "/start") {
-      reply(TelegramChatID, "NEW: Now you can generate LaTeX Documents with _/convertDoc LaTeX_!");
-      reply(TelegramChatID, "Send me the LaTeX and receive the image!\nIn groups send: _/convert LaTeX_");
-      reply(TelegramChatID, "The LatexBot Source Code is available at [GitHub](https://github.com/luigifreitas/LatexBot). Created by @luigifreitas :D");
-    } else {
-      if (sentence) {
-        if (sentence.match(/\input{(.*?)\}/g)){
-            // Blacklist Commands
-            reply(TelegramChatID, "Command not available.");
-            return;
-        }
-        if (command == "/convert" || command == "/convert@LatexBot") {
-          renderImage(TelegramChatID, sentence);
-        } else if (command == "/convertDoc" || command == "/convertDoc@LatexBot") {
-          renderDoc(TelegramChatID, sentence);
-        } else if (req.body.message.chat.title == undefined) {
-          renderImage(TelegramChatID, sentence);
-        }
-      } else {
-        reply(TelegramChatID, "Cannot find any sentence.");
+  const chatId = msg.chat.id;
+  console.log("status");
+  bot.sendMessage(chatId, "Hi, the bot is alive and working! Sending a test LaTeX equation:");
+  renderImage(chatId, "i\\hbar\\frac{\\partial}{\\partial t} \\Psi(\\mathbf{r},t) = \\left [ \\frac{-\\hbar^2}{2m}\\nabla^2 + V(\\mathbf{r},t)\\right ] \\Psi(\\mathbf{r},t)"); //Time-dependent Schrodinger equation (general)
+});
+
+async function renderImage(TelegramChatID, latex) {
+  request.post("https://quicklatex.com/latex3.f",
+    {
+      form: {
+        formula: `\\begin{align*}${latex}\\end{align*}`,
+        fsize: "99px",
+        fcolor: "000000",
+        mode: "0",
+        out: "1",
+        remhost: "quicklatex.com",
+        preamble: "\\usepackage{amsmath} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{graphicx} \\usepackage{mhchem}",
+        errors: "1"
       }
-    }
-  }
-});
+    }, (error, _, body) => {
+      if (error) {
+        bot.sendMessage(TelegramChatID, "Oh no! The LaTeX generator is broken. Please try again later.");
+      }
+      else {
+        const split = body.split("\n");
+        const image = split[1].split(" ")[0];
 
-app.get('/status', function(req, res){
-  res.send("✅ LatexBot is up!")
-});
-
-function renderImage(TelegramChatID, Sentence) {
-  var path = __dirname + '/latex/' + tokenGenerator(10) + '.png';
-  var dest = fs.createWriteStream(path);
-
-  var render = require("mathmode")(Sentence).pipe(dest);
-  render.on('finish', function () {
-    replyImage(TelegramChatID, path);
-  });
-}
-
-function renderDoc(TelegramChatID, Sentence) {
-  var path = __dirname + '/latex/' + tokenGenerator(10) + '.pdf';
-  var dest = fs.createWriteStream(path);
-
-  var render = require("latex")(Sentence).pipe(dest)
-  render.on('finish', function () {
-    replyFile(TelegramChatID, path);
-  });
-}
-
-function replyImage(TelegramChatID, Path) {
-  var formData = {
-    chat_id: TelegramChatID,
-    photo: fs.createReadStream(Path)
-  };
-  request.post({url:'https://api.telegram.org/' + BOT_AUTH + '/sendPhoto', formData: formData}, function(err,httpResponse,body){
-    var response = JSON.parse(body);
-    if (!response.ok) {
-      replyFile(TelegramChatID, Path);
-    }
-  });
-}
-
-function replyFile(TelegramChatID, Path) {
-  var formData = {
-    chat_id: TelegramChatID,
-    document: fs.createReadStream(Path)
-  };
-  request.post({url:'https://api.telegram.org/' + BOT_AUTH + '/sendDocument', formData: formData}, function(err,httpResponse,body){
-    var response = JSON.parse(body);
-    if (!response.ok) {
-      reply(TelegramChatID, "Sorry, something happend with the image. Check the LaTeX syntax.");
-    }
-  });
-}
-
-function reply(TelegramChatID, Sentence) {
-  var formData = {
-    chat_id: TelegramChatID,
-    parse_mode: "Markdown",
-    text: Sentence
-  };
-  request.post({url:'https://api.telegram.org/' + BOT_AUTH + '/sendMessage', formData: formData});
-}
-
-function tokenGenerator(num){
-  var text = "";
-  var possible = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  for( var i=0; i < num; i++ )
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  return text;
+        if (!error && image != "https://quicklatex.com/cache3/error.png") {
+          bot.sendPhoto(TelegramChatID, image);
+        }
+        else {
+          let compileError = "";
+          for (let i = 2; i < split.length; i++) compileError += split[i] + "\n";
+          bot.sendMessage(TelegramChatID, `Your LaTeX expression failed to compile:\n${compileError}`);
+        }
+      }
+    });
 }

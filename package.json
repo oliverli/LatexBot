@@ -1,6 +1,6 @@
 {
-  "name": "LatexBot",
-  "version": "3.0.0",
+  "name": "latexbot",
+  "version": "1.0.0",
   "description": "NodeJS LatexBot for Telegram",
   "author": "Luigi Freitas <luigifcruz@me.com>",
   "main": "server.js",
@@ -8,12 +8,23 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "body-parser": "^1.15.0",
-    "cookie-parser": "^1.4.1",
-    "express": "^4.13.3",
-    "https": "^1.0.0",
-    "latex": "0.0.1",
-    "mathmode": "0.0.4",
-    "request": "^2.69.0"
-  }
+    "node-telegram-bot-api": "^0.30.0",
+    "request": "^2.88.0",
+    "valid-url": "^1.0.9"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oliverli/LatexBot.git"
+  },
+  "keywords": [
+    "latex",
+    "telegram-bot",
+    "latexbot"
+  ],
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/oliverli/LatexBot/issues"
+  },
+  "homepage": "https://github.com/oliverli/LatexBot#readme"
 }
