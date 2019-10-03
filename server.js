@@ -1,6 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
 const request = require("request");
-const validUrl = require("valid-url");
 // replace the value below with the Telegram token you receive from @BotFather
 const token = "";
 
