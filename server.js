@@ -26,7 +26,7 @@ bot.onText(/\/convert (.+)/, (msg, match) => {
   // of the message
 
   const chatId = msg.chat.id;
-  const latex = match[1]; // the captured "whatever"
+  const latex = match[1].trim(); // the captured "whatever"
   renderImage(chatId, latex);
 });
 
@@ -41,28 +41,24 @@ bot.onText(/\/status/, (msg, _) => {
   renderImage(chatId, "i\\hbar\\frac{\\partial}{\\partial t} \\Psi(\\mathbf{r},t) = \\left [ \\frac{-\\hbar^2}{2m}\\nabla^2 + V(\\mathbf{r},t)\\right ] \\Psi(\\mathbf{r},t)"); //Time-dependent Schrodinger equation (general)
 });
 
-bot.onText(/\/convertraw(.*)/, (msg, match) => {
+bot.onText(/\/convertraw(?:\@\S*)?([\s\S]*)/, (msg, match) => {
   // "msg" is the received Message from Telegram
   // "match" is the result of executing the regexp above on the text content
   // of the message
 
   const chatId = msg.chat.id;
-  // const latex = match[1]; // the captured "whatever"
-  // input might be multilined -> len("/convertraw") = 11
-  const latex = match["input"].substring(11).trim()
+  const latex = match[1].trim(); // the captured "whatever"
 
   if (latex) renderImageRaw(chatId, latex, defaultPreamble);
 });
 
-bot.onText(/\/convertwithpreambleraw/, (msg) => {
+bot.onText(/\/convertwithpreambleraw(?:\@\S*)?([\s\S]*)/, (msg, match) => {
   // "msg" is the received Message from Telegram
   // "match" is the result of executing the regexp above on the text content
   // of the message
 
   const chatId = msg.chat.id;
-  // const latex = match[1]; // the captured "whatever"
-  // input might be multilined -> len("/convertwithpreambleraw") = 23
-  latex = msg["text"].substring(23).trim();
+  latex = match[1].trim(); // the captured "whatever"
 
   preamble = [defaultPreamble];
   body = [];
@@ -70,15 +66,14 @@ bot.onText(/\/convertwithpreambleraw/, (msg) => {
   x = latex.split("\n");
   l = x.length;
 
-  for(i = 0; i < l; i ++) {
-      elem = x[i];
+  x.forEach(function (elem) {
       if (elem.length >= 4 && elem.substring(0, 4) === "\\use") {
           preamble.push(elem);
       }
       else {
           body.push(elem);
       }
-  };
+  });
 
   preamble = preamble.join("\n");
   body = body.join("\n");
