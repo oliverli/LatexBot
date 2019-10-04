@@ -8,5 +8,7 @@ Expanded on the original called LatexBot. Unfortunately, the dependencies were a
 
 `\convertraw` converts any (multiline) LaTeX code in a normal LaTeX environment. Math mode has to be manually enabled with `$`s or a suitable environment. No adding of preamble packages are allowed.
 
+`\convertwithpreambleraw` converts any (multiline) LaTeX code in a normal LaTeX environment. Everything is the same as `\convertraw`, except any lines starting with `\use` will be added to the preamble and not the main LaTeX body. Hence, no fancy stuff such as `\makeatletter`, etc.
+
 Contributors:
 oliverli, sunjerry019
