@@ -10,5 +10,5 @@ Expanded on the original called LatexBot. Unfortunately, the dependencies were a
 
 `\convertwithpreambleraw` converts any (multiline) LaTeX code in a normal LaTeX environment. Everything is the same as `\convertraw`, except any lines starting with `\use` will be added to the preamble and not the main LaTeX body. Hence, no fancy stuff such as `\makeatletter`, etc.
 
-Contributors:
+Contributors:  
 oliverli, sunjerry019
