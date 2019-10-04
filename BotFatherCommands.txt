@@ -1,0 +1,4 @@
+convert - convert
+convertraw - convert raw LaTeX
+convertwithpreambleraw - convert raw LaTeX with Preamble
+status - Check the status of the bot
