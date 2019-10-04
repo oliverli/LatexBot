@@ -2,7 +2,7 @@
 
 Telegram to convert any given LaTeX code in a Telegram Chat into a rendered picture for easy viewing
 
-Expanded on the original called LatexBot. Unfortunately, the dependencies were all outdated and it didn't work anymore.
+Expanded on the original [LatexBot](https://github.com/luigifreitas/LatexBot). Unfortunately, the dependencies were all outdated and it didn't work anymore.
 
 `\convert` converts any LaTeX code in a math environment
 
