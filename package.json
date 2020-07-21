@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "node-telegram-bot-api": "^0.30.0",
-    "request": "^2.88.0"
+    "request": "^2.88.2"
   },
   "devDependencies": {},
   "repository": {
