@@ -10,23 +10,7 @@ Promise.config({
 // above due to https://github.com/yagop/node-telegram-bot-api/issues/319
 
 const TelegramBot = require("node-telegram-bot-api");
-const request = require("request");
 const { exec, execSync } = require("child_process");
-const tmp = require('tmp');
-tmp.setGracefulCleanup();
-
-// replace the value below with the Telegram token you receive from @BotFather
-// load token from file
-var fs = require('fs'),
-    path = require('path'),
-    filePath = path.join(__dirname, 'token.txt');
-
-    const token = fs.readFileSync(filePath, {encoding: 'utf-8'}, function(err, data){
-        if (err) {
-            console.log("Err:", err);
-            exit();
-        }
-    }).trim();
 
 // Get executable of pdflatex and imagemagick
 // If they are available, we prefer them
@@ -41,6 +25,22 @@ const pdflatex = check('pdflatex');
 const convert = check('convert');
 
 const usenative = (pdflatex && convert);
+const request   = (!usenative) ? require("request") : null;
+const tmp       =   usenative  ? require('tmp')     : null;
+if (tmp) tmp.setGracefulCleanup();
+
+// replace the value below with the Telegram token you receive from @BotFather
+// load token from file
+var fs = require('fs'),
+    path = require('path'),
+    filePath = path.join(__dirname, 'token.txt');
+
+    const token = fs.readFileSync(filePath, {encoding: 'utf-8'}, function(err, data){
+        if (err) {
+            console.log("Err:", err);
+            exit();
+        }
+    }).trim();
 
 // Create a bot that uses "polling" to fetch new updates
 const bot = new TelegramBot(token, { polling: true });
