@@ -1,3 +1,13 @@
+process.env.NTBA_FIX_319 = 1;
+
+const Promise = require('bluebird');
+
+Promise.config({
+    cancellation: true,
+});
+
+// above due to https://github.com/yagop/node-telegram-bot-api/issues/319
+
 const TelegramBot = require("node-telegram-bot-api");
 const request = require("request");
 
