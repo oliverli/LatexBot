@@ -33,7 +33,7 @@ const convert = execSync('which convert').toString().trim();
 // Create a bot that uses "polling" to fetch new updates
 const bot = new TelegramBot(token, { polling: true });
 
-const defaultPreamble = "\\usepackage{amsmath} \\usepackage{amsfonts} \\usepackage{amssymb} \\usepackage{graphicx} \\usepackage[version=4]{mhchem}"
+const defaultPreamble = ["\\usepackage{amsmath}", "\\usepackage{amsfonts}", "\\usepackage{amssymb}", "\\usepackage{graphicx}", "\\usepackage[version=4]{mhchem}"].join("\n");
 
 // Matches "/convert [whatever]"
 bot.onText(/\/convert (.+)/, (msg, match) => {
@@ -105,12 +105,12 @@ async function renderImageRaw(TelegramChatID, latex, preamble){
         var ws = fs.createWriteStream(latexfile, {emitClose: true});
         var hastikz = preamble.search("tikz") > -1; 
 
-        if(hastikz) ws.write("\\documentclass[tikz]{standalone}");
-        else ws.write("\\documentclass{standalone}");
+        if(hastikz) ws.write("\\documentclass[tikz]{standalone}\n");
+        else ws.write("\\documentclass{standalone}\n");
 
-        ws.write(preamble);
-        ws.write("\\begin{document}");
-        ws.write(latex);
+        ws.write(preamble + "\n");
+        ws.write("\\begin{document}\n");
+        ws.write(latex + "\n");
         ws.write("\\end{document}");
 
         ws.end();
@@ -150,7 +150,13 @@ async function renderImageRaw(TelegramChatID, latex, preamble){
                         return;
                     }
 
-                    bot.sendPhoto(TelegramChatID, path.join(pth, 'render.png'));
+                    bot.sendPhoto(
+                        TelegramChatID, 
+                        path.join(pth, 'render.png'), 
+                        {}, 
+                        { contentType: 'image/png' }
+                    );
+
                 });
             });
         })        
@@ -195,5 +201,5 @@ async function renderImageRaw(TelegramChatID, latex, preamble){
 }
 
 async function renderImage(TelegramChatID, latex) {
-    return renderImageRaw(TelegramChatID, `\\begin{align*}${latex}\\end{align*}`, defaultPreamble)
+    return renderImageRaw(TelegramChatID, `$ \\displaystyle \n${latex}\n $`, defaultPreamble);
 }
