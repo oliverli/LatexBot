@@ -70,6 +70,18 @@ bot.onText(/\/status/, (msg, _) => {
     renderImage(chatId, "i\\hbar\\frac{\\partial}{\\partial t} \\Psi(\\mathbf{r},t) = \\left [ \\frac{-\\hbar^2}{2m}\\nabla^2 + V(\\mathbf{r},t)\\right ] \\Psi(\\mathbf{r},t)"); //Time-dependent Schrodinger equation (general)
 });
 
+bot.onText(/\/credits/, (msg, _) => {
+    // "msg" is the received Message from Telegram
+    // "match" is the result of executing the regexp above on the text content
+    // of the message
+
+    const chatId = msg.chat.id;
+    console.log("credits");
+    bot.sendMessage(chatId, `Bot written by [sunjerry019](https://github.com/sunjerry019) and [oliverli](https://github.com/oliverli)\\.\n\nGitHub Repository at [oliverli/LatexBot](https://github.com/oliverli/LatexBot)\\.`, {parse_mode: "MarkdownV2"});
+
+    // Add your own status here if you want to check where it is running from.
+});
+
 bot.onText(/\/convertraw(?:\@\S*)?([\s\S]*)/, (msg, match) => {
     // "msg" is the received Message from Telegram
     // "match" is the result of executing the regexp above on the text content
