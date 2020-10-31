@@ -1,4 +1,3 @@
-process.env.NTBA_FIX_319 = 1;
 process.env.NTBA_FIX_350 = 1; // https://github.com/yagop/node-telegram-bot-api/blob/master/doc/usage.md#sending-files File Options
 // Suppress Error Message
 
@@ -7,6 +6,7 @@ const Promise = require('bluebird');
 Promise.config({
     cancellation: true,
 });
+
 // above due to https://github.com/yagop/node-telegram-bot-api/issues/319
 
 const TelegramBot = require("node-telegram-bot-api");
