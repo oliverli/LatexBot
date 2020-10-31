@@ -157,47 +157,11 @@ async function renderImageRaw(TelegramChatID, latex, preamble){
                         { contentType: 'image/png' }
                     );
 
+                    cleanupCallback();
                 });
             });
-        })        
-
-        // Manual cleanup
-        // cleanupCallback();
+        });
     });
-
-    // Manual cleanup
-    // tmpdir.removeCallback();
-
-    // request.post("https://quicklatex.com/latex3.f",
-    //   {
-    //     form: {
-    //       formula: `\\begin{align*}\\end{align*}${latex}`,
-    //       fsize: "99px",
-    //       fcolor: "000000",
-    //       mode: "0",
-    //       out: "1",
-    //       remhost: "quicklatex.com",
-    //       preamble: preamble,
-    //       errors: "1"
-    //     }
-    //   }, (error, _, body) => {
-    //     if (error) {
-    //       bot.sendMessage(TelegramChatID, "Oh no! The LaTeX generator is broken. Please try again later.");
-    //     }
-    //     else {
-    //       const split = body.split("\n");
-    //       const image = split[1].split(" ")[0].trim();
-
-    //       if (!error && image != "https://quicklatex.com/cache3/error.png") {
-    //         bot.sendPhoto(TelegramChatID, image);
-    //       }
-    //       else {
-    //         let compileError = "";
-    //         for (let i = 2; i < split.length; i++) compileError += split[i] + "\n";
-    //         bot.sendMessage(TelegramChatID, `Your LaTeX expression failed to compile:\n${compileError}`);
-    //       }
-    //     }
-    //   });
 }
 
 async function renderImage(TelegramChatID, latex) {
