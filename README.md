@@ -23,7 +23,7 @@ node server.js
 ```
 Then everything should be up and running!
 
-The app will check for the existence of `pdflatex` and `convert` (part of ImageMagick) to check if a native rendering of the latex equations is possible. This unfortunately only works Linux machines. (If any Windows/Mac Developer will like to contribute, please do!)
+The app will check for the existence of `pdflatex` and `convert` (part of ImageMagick) to check if a native rendering of the latex equations is possible. This unfortunately only works on Linux machines. (If any Windows/Mac Developer will like to contribute, please do!)
 
 If a native rendering is possible, the app will use the local installation of `pdflatex` to render the equations. `convert` will then be used to convert the rendered PDF equations to PNG.
 
