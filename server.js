@@ -3,7 +3,7 @@ process.env.NTBA_FIX_319 = 1;
 const Promise = require('bluebird');
 
 Promise.config({
-        cancellation: true,
+    cancellation: true,
 });
 
 // above due to https://github.com/yagop/node-telegram-bot-api/issues/319
@@ -21,8 +21,8 @@ var fs = require('fs'),
 
     const token = fs.readFileSync(filePath, {encoding: 'utf-8'}, function(err, data){
         if (err) {
-                console.log("Err:", err);
-                exit();
+            console.log("Err:", err);
+            exit();
         }
     }).trim();
 
