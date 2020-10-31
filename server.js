@@ -1,4 +1,6 @@
 process.env.NTBA_FIX_319 = 1;
+process.env.NTBA_FIX_350 = 1; // https://github.com/yagop/node-telegram-bot-api/blob/master/doc/usage.md#sending-files File Options
+// Suppress Error Message
 
 const Promise = require('bluebird');
 
@@ -26,7 +28,7 @@ var fs = require('fs'),
         }
     }).trim();
 
-// Get executable of pdflatex
+// Get executable of pdflatex and imagemagick
 const pdflatex = execSync('which pdflatex').toString().trim();
 const convert = execSync('which convert').toString().trim();
 
