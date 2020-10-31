@@ -33,6 +33,11 @@ If a native rendering is not possible, then the app will use the rendering endpo
 
 The generated image will then be sent to the user calling the bot.
 
+## Privacy
+If privacy is a concern for you, clone this repository to your own server and install the necessary pre-requisites. Running this app in the native mode allows you to keep your data only to you and Telegram. Feel free to go through the (rather straightforward) code to ensure that your LaTeX equations will never be in the hands of anyone you don't want. 
+
+A copy of the bot runs at [t.me/YCLaTeXbot](http://t.me/YCLaTeXbot).
+
 ## Contributing
 Feel free to make a PR!
 
