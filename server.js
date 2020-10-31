@@ -7,10 +7,10 @@ const Promise = require('bluebird');
 Promise.config({
     cancellation: true,
 });
-
 // above due to https://github.com/yagop/node-telegram-bot-api/issues/319
 
 const TelegramBot = require("node-telegram-bot-api");
+const request = require("request");
 const { exec, execSync } = require("child_process");
 const tmp = require('tmp');
 tmp.setGracefulCleanup();
@@ -29,13 +29,24 @@ var fs = require('fs'),
     }).trim();
 
 // Get executable of pdflatex and imagemagick
-const pdflatex = execSync('which pdflatex').toString().trim();
-const convert = execSync('which convert').toString().trim();
+// If they are available, we prefer them
+function check(appl) {
+    try { proc_obj = execSync(`which ${appl}`, {stdio : ['pipe', 'pipe', 'ignore']}); }
+    catch(e) { return false; }
+
+    return proc_obj.toString().trim();
+}
+
+const pdflatex = check('pdflatex');
+const convert = check('convert');
+
+const usenative = (pdflatex && convert);
 
 // Create a bot that uses "polling" to fetch new updates
 const bot = new TelegramBot(token, { polling: true });
 
-const defaultPreamble = ["\\usepackage{amsmath}", "\\usepackage{amsfonts}", "\\usepackage{amssymb}", "\\usepackage{graphicx}", "\\usepackage[version=4]{mhchem}"].join("\n");
+const dp = ["\\usepackage{amsmath}", "\\usepackage{amsfonts}", "\\usepackage{amssymb}", "\\usepackage{graphicx}", "\\usepackage[version=4]{mhchem}"]
+const defaultPreamble = usenative ? dp.join("\n") : dp.join("");
 
 // Matches "/convert [whatever]"
 bot.onText(/\/convert (.+)/, (msg, match) => {
@@ -55,7 +66,7 @@ bot.onText(/\/status/, (msg, _) => {
 
     const chatId = msg.chat.id;
     console.log("status");
-    bot.sendMessage(chatId, "Hi, the bot is alive and working! Sending a test LaTeX equation:");
+    bot.sendMessage(chatId, `Hi, the bot is alive and running in ${usenative ? 'native' : 'web'} mode! Sending a test LaTeX equation:`);
     renderImage(chatId, "i\\hbar\\frac{\\partial}{\\partial t} \\Psi(\\mathbf{r},t) = \\left [ \\frac{-\\hbar^2}{2m}\\nabla^2 + V(\\mathbf{r},t)\\right ] \\Psi(\\mathbf{r},t)"); //Time-dependent Schrodinger equation (general)
 });
 
@@ -99,7 +110,45 @@ bot.onText(/\/convertwithpreambleraw(?:\@\S*)?([\s\S]*)/, (msg, match) => {
     if (body) renderImageRaw(chatId, body, preamble);
 });
 
-async function renderImageRaw(TelegramChatID, latex, preamble){
+async function renderImageRaw(...args){
+    if (usenative) { return nativeRenderImage(...args); }
+    else { return webRenderImage(...args); }
+}
+
+async function webRenderImage(TelegramChatID, latex, preamble) {
+    request.post("https://quicklatex.com/latex3.f",
+    {
+        form: {
+            formula: `\\begin{align*}\\end{align*}${latex}`,
+            fsize: "99px",
+            fcolor: "000000",
+            mode: "0",
+            out: "1",
+            remhost: "quicklatex.com",
+            preamble: preamble,
+            errors: "1"
+        }
+    }, (error, _, body) => {
+        if (error) {
+            bot.sendMessage(TelegramChatID, "Oh no! The LaTeX generator is broken. Please try again later.");
+        }
+        else {
+            const split = body.split("\n");
+            const image = split[1].split(" ")[0].trim();
+
+            if (!error && image != "https://quicklatex.com/cache3/error.png") {
+                bot.sendPhoto(TelegramChatID, image);
+            }
+            else {
+                let compileError = "";
+                for (let i = 2; i < split.length; i++) compileError += split[i] + "\n";
+                bot.sendMessage(TelegramChatID, `Your LaTeX expression failed to compile:\n${compileError}`);
+            }
+        }
+    });
+}
+
+async function nativeRenderImage(TelegramChatID, latex, preamble) {
     tmp.dir({unsafeCleanup: true}, function _tempDirCreated(err, pth, cleanupCallback) {
         if (err) throw err;
 
